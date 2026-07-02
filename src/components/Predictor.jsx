@@ -61,15 +61,22 @@ export default function Predictor() {
         let d = data.draw ?? data.draw_probability ?? 0;
         let a = data.away_win ?? data.away_win_probability ?? 0;
 
+        // If values are in decimal form (0–1), convert to percentage
         if (h <= 1 && d <= 1 && a <= 1 && (h > 0 || d > 0 || a > 0)) {
-          h = parseFloat((h * 100));
-          d = parseFloat((d * 100));
-          a = parseFloat((a * 100));
-        } else {
-          h = Number(parseFloat(h));
-          d = Number(parseFloat(d));
-          a = Number(parseFloat(a));
+          h = h * 100;
+          d = d * 100;
+          a = a * 100;
         }
+
+        // Clean floating-point precision issues
+        h = Math.round(h * 100) / 100;
+        d = Math.round(d * 100) / 100;
+        a = Math.round(a * 100) / 100;
+
+        // OR if you want whole percentages only, use this instead:
+        // h = Math.round(h);
+        // d = Math.round(d);
+        // a = Math.round(a);
 
         setHomeWin(h);
         setDraw(d);
