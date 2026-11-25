@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import countries from "../../countries.json"
+import { savePrediction } from "../utils/predictionHistory"
 
 // Custom CSS-based flag gradients for premium placeholder rendering
 const TEAM_COLORS = {
@@ -84,33 +85,17 @@ export default function Predictor() {
         setHasPredicted(true);
         setIsComputing(false);
 
-        // Save prediction to history
-        let localWinner = "Draw";
-        if (h > d && h > a) {
-          localWinner = "home";
-        } else if (a > d && a > h) {
-          localWinner = "away";
-        }
-
-        const newPrediction = {
-          date: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
-          homeTeam: homeTeam,
-          awayTeam: awayTeam,
-          target: localWinner === 'home' ? 'Home Win' : (localWinner === 'away' ? 'Away Win' : 'Draw'),
-          odds: `${Math.max(h, a, d).toFixed(0)}%`,
-          score: "--",
-          type: "Pending",
-          status: "Pending",
-          league: tournament
-        };
-
-        try {
-          const existing = localStorage.getItem("user_predictions");
-          const list = existing ? JSON.parse(existing) : [];
-          localStorage.setItem("user_predictions", JSON.stringify([newPrediction, ...list]));
-        } catch (storageError) {
-          console.error("Error saving prediction to localStorage:", storageError);
-        }
+        // Save prediction to the user's local browser history
+        savePrediction({
+          homeTeam,
+          awayTeam,
+          tournament,
+          stadiumCountry,
+          neutralVenue,
+          homeWin: h,
+          draw: d,
+          awayWin: a,
+        });
       } catch (error) {
         console.error("Error fetching prediction from API:", error);
         setApiError("Failed to fetch predictions from API. Ensure prediction engine is running.");
@@ -468,7 +453,7 @@ export default function Predictor() {
               </div>
 
               {/* Projected Outcome Highlight */}
-              <div className="mt-8 pt-6 border-t border-white/5 flex justify-center">
+              <div className="mt-8 pt-6 border-t border-white/5 flex flex-col items-center gap-3">
                 <div className={`border rounded-full px-6 py-3 flex items-center gap-3 shadow-lg transition-all duration-300 ${isComputing
                   ? "bg-primary/10 border-primary/40 text-primary shadow-[0_0_20px_rgba(173,198,255,0.15)]"
                   : (apiError
@@ -484,6 +469,12 @@ export default function Predictor() {
                     {isComputing ? "Re-Evaluating..." : (apiError ? `Error: ${apiError}` : projectedWinnerLabel)}
                   </span>
                 </div>
+                {hasPredicted && !isComputing && !apiError && (
+                  <span className="font-label-caps text-[11px] text-on-surface-variant flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[14px] text-secondary">bookmark_added</span>
+                    Saved to your local prediction history
+                  </span>
+                )}
               </div>
             </div>
           </div>

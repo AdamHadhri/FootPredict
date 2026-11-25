@@ -15,7 +15,7 @@ export default function App() {
       case 'predict':
         return <Predictor />
       case 'history':
-        return <History />
+        return <History onNavigate={setCurrentPage} />
       default:
         return <Home onNavigate={setCurrentPage} />
     }
@@ -24,7 +24,7 @@ export default function App() {
   const navItems = [
     { id: 'home', label: 'Home' },
     { id: 'predict', label: 'Predictor Engine' },
-    { id: 'history', label: 'History & Yield' }
+    { id: 'history', label: 'Prediction History' }
   ]
 
   return (
